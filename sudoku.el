@@ -17,6 +17,7 @@
 (define-key sudoku-mode-map (kbd "8") 'sudoku-debug-put8)
 (define-key sudoku-mode-map (kbd "9") 'sudoku-debug-put9)
 (define-key sudoku-mode-map (kbd "0") 'sudoku-debug-rm)
+(define-key sudoku-mode-map (kbd "l") 'sudoku-load-board)
 (define-key sudoku-mode-map (kbd "p") 'sudoku-find-sol)
 )
 
@@ -41,7 +42,10 @@
 )
 (defvar *sudoku-board* nil
   "The sudoku board with number from 0 to upper bound"
-)
+  )
+(defvar *sudoku-loaded-list* nil
+  "The list loaded to be a board"
+  )
 (defvar *sudoku-check-row* nil
   "1 if the number is existing in this row, 0 otherwise"
 )
@@ -55,7 +59,7 @@
 (defconst *sudoku-occupied* 1)
 (defconst *sudoku-empty-char* 0)
 ;;;###autoload
-(defun sudoku-game ()
+(defun sudoku()
   (interactive)
   (switch-to-buffer "sudoku")
   (sudoku-mode)
@@ -184,12 +188,35 @@
       (setq col (+ col 1)) (setq row 0))
     (when (eq col *sudoku-col-size*) (ui-refresh))
  "break")))
+
 ;; board loading function
+(defun sudoku-load-board (filename)
+  (interactive "sPlease Enter the sudoku board file name:")
+  (readfile filename)
+  (sudoku-load-list *sudoku-board-list*)
+)
+;; board load a list to the main sudoku board buffer
 (defun sudoku-load-list (list)
+  (if (null list) throw 'exit "list is null")
   (if (<= (length list) (* *sudoku-row-size* *sudoku-col-size*)) (dotimes (row *sudoku-row-size*) (dotimes (col *sudoku-col-size*) (sudoku-put col row (elt list (get-index col row))))) (message "fail to load!"))
   (message (format "sudoku board loaded! List Length: %d" (length list) ))
   (ui-refresh)
+  )
+
+;; board loading extenal file
+(defun readfile (stringname)
+  (with-temp-buffer
+    (insert-file-contents stringname nil 0 500)
+    (setq *sudoku-board-list* (list-integer (split-string (buffer-string) " " t)))
+  )
 )
+;; helper function convert a list of integer string to a list of corresponding integer
+(defun list-integer (list)
+  (mapcar (lambda (arg) (string-to-number arg)) list)
+)
+
+;; todo
+
 ;; board and check table change wrappers
 (defun sudoku-put (col row number)
   "Wrapper when put a number in col row"
