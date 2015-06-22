@@ -19,6 +19,7 @@
 (define-key sudoku-mode-map (kbd "0") 'sudoku-debug-rm)
 (define-key sudoku-mode-map (kbd "l") 'sudoku-load-board)
 (define-key sudoku-mode-map (kbd "p") 'sudoku-find-sol)
+(define-key sudoku-mode-map (kbd "d") 'sudoku-design-board)
 )
 
 (defvar *current-col* 0
@@ -197,12 +198,28 @@
 )
 ;; board load a list to the main sudoku board buffer
 (defun sudoku-load-list (list)
+  (let ((inhibit-read-only t))
   (if (null list) throw 'exit "list is null")
-  (if (<= (length list) (* *sudoku-row-size* *sudoku-col-size*)) (dotimes (row *sudoku-row-size*) (dotimes (col *sudoku-col-size*) (sudoku-put col row (elt list (get-index col row))))) (message "fail to load!"))
+  (if (<= (length list) (* *sudoku-row-size* *sudoku-col-size*)) (progn (sudoku-init) (dotimes (row *sudoku-row-size*) (dotimes (col *sudoku-col-size*) (sudoku-put col row (elt list (get-index col row)))))) (message "fail to load!"))
   (message (format "sudoku board loaded! List Length: %d" (length list) ))
-  (ui-refresh)
+  (ui-refresh))
   )
 
+;; design board
+(defun sudoku-design-board (stringname)
+  "use the current UI to design a new board"
+  (interactive "sPlease enter a name for the board")
+  (with-temp-buffer
+    (insert (list-to-string *sudoku-board*))
+    (write-region nil nil stringname nil) ; default setting for IO is overwrite NOTICE 
+  )
+)
+(defun list-to-string (list)
+  (let ((str ""))
+    (dotimes (i (length list))
+      (setq str (concat str (number-to-string (elt list i))))
+      (setq str (concat str " ")))
+    (setq str str)))
 ;; board loading extenal file
 (defun readfile (stringname)
   (with-temp-buffer
@@ -215,7 +232,7 @@
   (mapcar (lambda (arg) (string-to-number arg)) list)
 )
 
-;; todo
+
 
 ;; board and check table change wrappers
 (defun sudoku-put (col row number)
