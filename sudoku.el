@@ -2,7 +2,7 @@
 ;; this is a practice in eLisp
 ;; Comes with no guarantee
 
-(define-derived-mode sudoku-mode special-mode "sudoku-mode"
+(define-derived-mode sudoku-mode fundamental-mode "sudoku-mode"
   (define-key sudoku-mode-map (kbd "<up>") 'sudoku-input-up)
   (define-key sudoku-mode-map (kbd "<down>") 'sudoku-input-down)
   (define-key sudoku-mode-map (kbd "<left>") 'sudoku-input-left)
