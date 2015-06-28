@@ -20,6 +20,7 @@
 (define-key sudoku-mode-map (kbd "l") 'sudoku-load-board)
 (define-key sudoku-mode-map (kbd "p") 'sudoku-find-sol)
 (define-key sudoku-mode-map (kbd "d") 'sudoku-design-board)
+(define-key sudoku-mode-map (kbd "r") 'sudoku-restart)
 )
 
 (defvar *current-col* 0
@@ -62,19 +63,30 @@
 ;;;###autoload
 (defun sudoku()
   (interactive)
+  (setq max-specpdl-size 10000)
+  (setq max-lisp-eval-depth 500000)
   (switch-to-buffer "sudoku")
   (sudoku-mode)
   (sudoku-init)
   (erase-buffer)
+  (ui-refresh)
 )
 ;; initialize functions
 (defun sudoku-init ()
+  (let ((inhibit-read-only t))
   (erase-buffer)
   (setq *sudoku-board* (make-vector (* *sudoku-col-size* *sudoku-row-size*) *sudoku-empty-char*))
   (setq *sudoku-check-row* (make-vector (* *sudoku-row-size* (+ *sudoku-upper-bound* 1)) *sudoku-empty*))
   (setq *sudoku-check-col* (make-vector (* *sudoku-col-size* (+ *sudoku-upper-bound* 1)) *sudoku-empty*))
-  (setq *sudoku-check-block* (make-vector (* *sudoku-row-size* (+ *sudoku-upper-bound* 1)) *sudoku-empty*))
-)
+  (setq *sudoku-check-block* (make-vector (* *sudoku-row-size* (+ *sudoku-upper-bound* 1)) *sudoku-empty*)))
+  )
+;; restart function
+(defun sudoku-restart()
+  (interactive)
+  (sudoku-init)
+  (ui-refresh)
+  )
+  
 ;; debug put number
 (defun sudoku-debug-put1 ()(interactive) (dp 1))
 (defun sudoku-debug-put2 ()(interactive) (dp 2))
